@@ -1,44 +1,23 @@
-name: Run Laravel Tests
+name: Run Tests
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+on: [push, pull_request]
 
 jobs:
-  laravel-tests:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PHP
+      - name: Set up PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
-          extensions: mbstring, pdo, sqlite, bcmath
-          coverage: none
+          php-version: 8.2
+          extensions: mbstring, bcmath, ctype, fileinfo, json, openssl, pdo, tokenizer, xml
+          tools: composer:v2
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
-
-      - name: Copy .env
-        run: cp .env.example .env
-
-      - name: Generate app key
-        run: php artisan key:generate
-
-      - name: Set permissions
-        run: chmod -R 777 storage bootstrap/cache
-
-      - name: Setup SQLite database
-        run: |
-          mkdir -p database
-          touch database/database.sqlite
+        run: composer install --prefer-dist --no-progress
 
       - name: Run tests
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
         run: php artisan test
