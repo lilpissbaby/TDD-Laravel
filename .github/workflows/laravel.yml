@@ -14,3 +14,6 @@ jobs:
     steps:
     - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
       run: touch laravel_test.txt
+    - name: Execute php artisan test
+      run: php artisan test
+  
