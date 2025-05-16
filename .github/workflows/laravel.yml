@@ -1,4 +1,4 @@
-name: Laravel
+name: Run Laravel Tests
 
 on:
   push:
@@ -8,12 +8,37 @@ on:
 
 jobs:
   laravel-tests:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
-      run: touch laravel_test.txt
-    - name: Execute php artisan test
-      run: php artisan test
-  
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, pdo, sqlite, bcmath
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Set permissions
+        run: chmod -R 777 storage bootstrap/cache
+
+      - name: Setup SQLite database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test
